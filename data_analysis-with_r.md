@@ -188,7 +188,7 @@ We can also get these counts and other data points  by running the summary funct
 
 Learn more about [Data Types](https://www.statmethods.net/input/datatypes.html).
 
-### Ordered Facors
+### Ordered Factors
 
 Now, I want to draw your attention to the `age.range` variable right here.
 
