@@ -1,6 +1,9 @@
 # R Console Issue
 
-## LOCALE ERROR
+[TOC]
+## ERROR
+
+### LOCALE ERROR
 
 The errors on **Mac Sierra** are:
 
@@ -41,3 +44,39 @@ Reference: [StackOverflow](https://stackoverflow.com/questions/9689104/installin
 > If you want to set your locale to `ko_KR.UTF-8`, write the code below:
 >
 > `Sys.setlocale('LC_ALL', 'ko_KR.UTF-8')`
+
+## WARNING
+
+### Warning message: package 'ggplot'
+
+```
+library(ggplot2)
+Warning message:
+package ‘ggplot2’ was built under R version 3.4.4 
+```
+
+**Solve:**
+
+My current version of R is older than current version on [CRAN](https://cran.r-project.org/bin/macosx/). R has been updated 3.5.1 on 2nd July 2018, so you should update it when you have a chance.
+
+1. Run the R Console
+2. Check for R updates
+3. Visit [CRAN](https://cran.r-project.org/bin/macosx/)
+
+![ggplot_warning_solution](./img_issue/ggplot_warning_solution.png)
+
+4. Re-install the [R-3.5.1.pkg](https://cran.r-project.org/bin/macosx/R-3.5.1.pkg)
+
+![ggplot_warning_CRAN](./img_issue/ggplot_warning_CRAN.png)
+
+5. Check your version of R is up to date
+
+![ggplot_warning_solved](./img_issue/ggplot_warning_solved.png)
+
+**Note:**
+
+This warning can NOT be solved by updating RStudio like the screenshots below.
+
+![ggplot_warning_solve_1](./img_issue/ggplot_warning_note.png)
+
+This update DOES NOT UPDATE your version of R, so you should update R via [**HERE**](https://stat.ethz.ch/pipermail/r-help/2018-March/451633.html).
