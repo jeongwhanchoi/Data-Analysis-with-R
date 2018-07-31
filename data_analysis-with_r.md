@@ -1016,3 +1016,121 @@ What the bottom of the box means. And what this black line means.
 >
 > [Intro to Descriptive Statistics Exercise: Match Box Plots](https://classroom.udacity.com/courses/ud827/lessons/1471748603/concepts/834179180923)
 
+### Box Plots, Quartiles and Friendships
+
+![pf_box_plot_with_coord_cartesian](./img/pf_box_plot_with_coord_cartesian.png)
+
+It looks like females on average have slightly more friends than men. Since I can see that this median line is slightly higher. That's what this black line is. It represents the median or the middle 50% of friend counts for females and for males. 
+
+```r
+qplot(x = gender, y = friend_count, data = subset(pf, !is.na(gender)), geom = 'boxplot') + coord_cartesian(ylim = c(0,250))
+```
+
+Now this difference isn't very large. So let's zoom in to take a closer look. 
+
+![pf_box_plot_with_coord_cartesian_other_limits](./img/pf_box_plot_with_coord_cartesian_other_limits.png)
+
+This box for females and this box for males Represents the middle 50% of values in our sample. So, I think it makes sense that we zoom in even more to take a closer look. We should consider any values less than 250. Now, there's no exact choice here, I'm just choosing something that seems reasonable, since the bulk of my data is down here. After running this code, we can now see that the bulk of user friend count is similar for the middle 50% of men as it is for the middle 50% of women. Its just our females are slightly higher for friend count. Lets look at actual values though and compare the values to what we see in our box plot. We can look at those values by using the by command and running a summary of our friend count split by gender. So first, I want to include my friend count which is the variable I want a summary of. I want to split it over gender and I want a summary.
+
+```r
+by(pf$friend_count, pf$gender, summary)
+```
+
+Running this code, I get an output of my table, which shows me the minimum maximum values for both genders, as well as the quartiles.
+
+- female
+
+| Min. | 1st Qu. | Median | Mean | 3rd Qu. | Max. |
+| :--: | :-----: | :----: | :--: | :-----: | :--: |
+|  0   |   37    |   96   | 242  |   244   | 4923 |
+
+- male
+
+| Min. | 1st Qu. | Median | Mean | 3rd Qu. | Max. |
+| :--: | :-----: | :----: | :--: | :-----: | :--: |
+|  0   |   27    |   74   | 165  |   182   | 4917 |
+
+The first quartile for women is 37 and that looks about right in our graph. The third quartile or the 75% mark is at 244. This means that 75% of female users have friend counts below 244. Or another way to say this is that 25% of female users have more than 244 friends. Similarly for the men, we can see how the first quartiles and the third quartiles match up to the box plot. Now, you might have remembered that we used `coord_cartesian()`. We did this so that way, the table output would match our box plots. If we would have just used the `ylim` parameter inside of qplot, we would have gotten different quantiles that wouldn't match our picture. This is just a subtle difference that you should be aware of when working in R. 
+
+To make my box plot I'll pass `x` the variable gender, since that's my categorical variable. And then I'll pass `y`, `friendships_initiated`. Now I need to subset my data frame just like from before.
+
+```r
+qplot(x = gender, y = friendships_initiated, data = subset(pf, !is.na(gender)), geom = 'boxplot') + coord_cartesian(ylim = c(0,500))
+```
+
+And then I'll need to tell cube plot that I want to box plot. So I'll set the `geom`.
+
+![pf_friends_initiated_plot](./img/pf_friends_initiated_plot.png)
+
+Looking at this plot, we see that most users make less than 500 friend requests. So let's set our y limb setting zero as our minimum and 500 as our max. So I'll add the `cored_cartesian()` layer and set my limits. It's really close, but it looks like females have slightly more friend requests. Since the median black line is slightly higher for females than this median black line for males. Now, this might be too close to call. So, I say we should zoom in again. 
+
+```r
+qplot(x = gender, y = friendships_initiated, data = subset(pf, !is.na(gender)), geom = 'boxplot') + coord_cartesian(ylim = c(0,150))
+```
+
+This time, we'll change the upper limit to 150. 
+
+![pf_friends_initiated_150_plot](./img/pf_friends_initiated_150_plot.png)
+
+Yeah, it looks like females initiate slightly more friendships on average. Let's also check this with a numerical summary. I can use the by command and split `friendships_initiated` by gender and then, find their summary. 
+
+```R
+by(pf$friendships_initiated, pf$gender, summary)
+```
+
+So, I'll take my `friendships_initiated`, split it by `gender` and then run a `summary`. And here's our output. 
+
+![pf_friends_initated_summary](./img/pf_friends_initated_summary.png)
+
+And we can see that the median for females is 49 whereas the median for males is 44. Now, you might be wondering, why should we even create this box spot to begin with if we can answer our question with a numerical summary. Well, it's helpful to understand the distribution of the data. So in the case of the box plot, we can see the middle 50% of values for each segment of our categorical variable. Our box plots also let us get a sense of alliers. So in one way, they're much more rich with information than just this table.
+
+> [How to Interpret a Boxplot](http://flowingdata.com/2008/02/15/how-to-read-and-use-a-box-and-whisker-plot/)   The [interquartile range or IQR](http://en.wikipedia.org/wiki/Interquartile_range) includes all of the values between the bottom and top of the boxes in the boxplot. 
+
+### Getting Logical
+
+So far, we've looked at a number of visualizations to examine the distribution of a single variable. And, we also looked at transforming a variable to get a better look at the data. Now, there are other ways that we can transform a variable, beside using something like the square root or a log. You often want to convert variables that have a lot of zero values to a new binary variable that has only true or false. This is helpful because we may want to know whether a user has used a certain feature at all, instead of the number of times that the user has actually used that feature. For example, it may not matter how many times a person checked in using a mobile device. But, whether the person has ever used mobile check-in. Here's what I mean. 
+
+```r
+summary(pf$mobile_likes)
+```
+
+Here's a summary of the mobile likes in our dataset. 
+
+| Min. | 1st Qu. | Median | Mean  | 3rd Qu. |  Max.   |
+| :--: | :-----: | :----: | :---: | :-----: | :-----: |
+| 0.0  |   0.0   |  4.0   | 106.1 |  46.0   | 25111.0 |
+
+The median is four, which means we have a lot of zeroes in our dataset. If I run this summary, I'm going to get a different type of table. Notice that in the table I get logical counts, because I use this comparison operator. 
+
+```r
+summary(pf$mobile_likes > 0)
+```
+
+|  Mode   | FALSE | TRUE  |
+| :-----: | :---: | :---: |
+| logical | 35056 | 63947 |
+
+I wanted to see whether or not someone had actually checked in. So, instead of tracking the count of mobile likes, let's create a new variable that tracks mobile check-ins. We'll call this variable, mobile_check_in. The first thing I'll do is assign it a bunch of NA values. Next, we can use the if/else function to assign a value of one if the user has checked in using mobile and a value of zero if the user has not checked in. So in this if/else statement, if this condition is true, we'll assign our user a value of 1. Otherwise, we'll give them a value of 0. And the last thing I'll do is convert it to a factor variable. Running this code, I get my new variable saved. And then taking a summary of the results, I can see that about 64,000 just shy of that, have checked in using mobile while 35,000 have not.
+
+```r
+mobile_check_in <- NA
+pf$mobile_check_in <- ifelse(pf$mobile_likes > 0, 1, 0)
+pf$mobile_check_in <- ifelse(pf$mobile_likes)
+summary(pf$mobile_check_in)
+```
+
+|  Min.  | 1st Qu. | Median |  Mean  | 3rd Qu. |  Max.  |
+| :----: | :-----: | :----: | :----: | :-----: | :----: |
+| 0.0000 | 0.0000  | 1.0000 | 0.6459 | 1.0000  | 1.0000 |
+
+We need to know the number of users who did check in using mobile and the total number of users in our sample. Now I could have just used these two numbers and divided them, but I want to do this programmatically. 
+
+```r
+summary(pf$mobile_check_in)
+sum(pf$mobile_check_in == 1)/length(pf$mobile_check_in)
+```
+
+To do that I can take the sum of my mobile check in variables when it's equal to one. And then divide that by the length of that vector. This is how many users are in our sample. Running that code I can see that I get about 64.5%, or 64.6%. Rounding to the nearest percent, that's just 65. Now that's over half of the users in the data set, so it wouldn't make a whole lot of sense to continue the development of the mobile experience. At least based on this sample data set.
+
+- output: 0.6459097
+
