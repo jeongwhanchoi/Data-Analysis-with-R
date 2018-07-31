@@ -684,3 +684,280 @@ We can use the `xlab` and `ylab` parameters. Now, making sure I have a comma aft
 >   ylab('Number of users in sample')
 > ```
 
+### User ages
+
+To create our histogram of user ages, let's start by using the `qplot()` function. We'll pass it the variable age. And our dataset is pseudo Facebook so `pf`. I'm going to add some color using the color and fill parameters.
+
+```r
+qplot(x = age, data = pf, color = I('black'), fill = I('#5760AB'))
+```
+
+Running this code we see we get our histogram.
+
+![pf_user_ages_plot](./img/pf_user_ages_plot.png)
+
+Now you might have tried a variety of bin widths. And in this case I think a bin width of one is the best. So let's add that in here. I chose a `binwidth` of one since, one makes sense, since we're going by years or ages. 
+
+```r
+qplot(x = age, data = pf, binwidth = 1, color = I('black'), fill = I('#5760AB'))
+```
+
+This gives me a histogram of counts of users by individual years, so I can get a finer view of the data for say, like, 25years old.
+
+![pf_user_ages_binwidth_plot](./img/pf_user_ages_binwidth_plot.png)
+
+By setting the `binwidth` equal to one, it allows us to more easily spot unusual spikes in our data.
+
+I see the lsrgest spikes in the mid to late 20's, and we don't have any users who put in an age lower than 13 at the left of the histogram. This makes sense because users must be at least 13 years old to set up Facebook account. Now there's also some unusual spikes above 100, but my guess is that some users may be exaggerating their age. 
+
+```R
+qplot(x = age, data = pf, binwidth = 1, color = I('black'), fill = I('#5760AB')) + scale_x_discrete(breaks = seq(0, 113, 5))
+```
+
+We can use scale x discrete or scale x continuous to change this appearance. So I adding scale x discrete here, I can set the breaks so they run from 0 to 113, and they increment every five units, or every five years. Now you might be wondering why I chose 113 here, and I just used the maximum age in our user dataset.
+
+![pf_user_ages_binwidth_scaled_plot](./img/pf_user_ages_binwidth_scaled_plot.png)
+
+> **Note**: The use of the `scale_x_discrete()` layer as shown in the video is depreciated as of `ggplot2`version 2.0. You can use `scale_x_continuous()` instead to get the break points, or use `ggplot()`syntax as shown below.
+>
+> Equivalent ggplot syntax:
+>
+> ```r
+> ggplot(aes(x = age), data = pf) +
+>   geom_histogram(binwidth = 1, fill = '#5760AB') +
+>   scale_x_continuous(breaks = seq(0, 113, 5))
+> ```
+
+### Transforming Data
+
+Let's use the approach of transforming variables on our Facebook dataset. Most of our varibles, such as friend count, likes, comments, wall posts and others are variables that I would call engagement variables, and they all have very long tails. 
+
+```r
+qplot(x = friend_count, data = pf)
+```
+
+Some users have 10 times, or even 100, the median value. Another way to say this is that some people have an order of magnitudes, more likes, clicks, or comments, than any other users. In statistics, we say that the data is over dispersed. Often it helps to transform these values so we can see standard deviations, or orders of magnitudes, so we are in effect, shortening the tail. 
+
+![pf_friend_count_plot](./img/pf_friend_count_plot.png)
+
+Here was our histogram of friend count from before, and notice, we still have that long tail. We can transfrom this variable by taking the log, either using the natural log, log base 2, or log base 10. We could also use other functins, such as the square root, and doing so helps us to see patterns more clearly, without being distracted by the tails. A lot of common statistical techniques, like linear regression, are based on the assumption that variables have normal distributions. So by taking the log of this variable, we can transform our data to turn it into maybe a normal distribution or something that more closely resembles a normal distribution, if we'd be using linear regression or some other modelling technique.
+
+Now, I kwow we're not doing modelling here, but let's just see what it looks like to transform the variable. First, I'm going to just do this in the `summary()` command. 
+
+```R
+summary(pf$friend_count)
+```
+
+So here's our regular summary of `friend_count`. Looks like the median `friend_count` is 82, and the meam is 196.
+
+| Min. | 1st Qu. | Median | Mean  | 3rd Qu. |  Max.  |
+| :--: | :-----: | :----: | :---: | :-----: | :----: |
+| 0.0  |  31.0   |  82.0  | 196.4 |  206.0  | 4923.0 |
+
+I can take the log base 10 of this `friend_count` and get a different table. Now this seems a little bbit unusual since I have negative infinity for the minimum and negative infinity for the mean.
+
+```r
+summary(log10(pf$friend_count))
+```
+
+Some of our users have a friend count of zeor. So, when we take the log of base 10 of zero, that would be undefined. For those familiar with Calculus, the limit would be negative infinity, which is why that appears here. 
+
+| Min. | 1st Qu. | Median | Mean | 3rd Qu. | Max.  |
+| :--: | :-----: | :----: | :--: | :-----: | :---: |
+| -Inf |  1.491  | 1.914  | -Inf |  2.314  | 3.692 |
+
+To avoid this, we're going to add one to  `friend_count`, so that way we don't get an undefined answer, or negative infinity.
+
+```r
+summary(log10(pf$friend_count + 1))
+```
+
+There, that looks much better.
+
+| Min. | 1st Qu. | Median | Mean  | 3rd Qu. | Max.  |
+| :--: | :-----: | :----: | :---: | :-----: | :---: |
+|  0   |  1.505  | 1.919  | 1.868 |  2.316  | 3.692 |
+
+ And, just to show you another function, let's also use the square root on friend count.
+
+```r
+summary(sqrt(pf$friend_count))
+```
+
+This would be another type of transformation.
+
+| Min. | 1st Qu. | Median |  Mean  | 3rd Qu. |  Max.  |
+| :--: | :-----: | :----: | :----: | :-----: | :----: |
+| 0.0  |  5.568  | 9.055  | 11.088 | 14.353  | 79.164 |
+
+For me, log base 10 is an easier transformation to wrap my head around, since I'm just comparing friend counts on orders of magnitude of 10. Basically a tenfold scale like th pH scale. Now that you've seen transformations within summaries, let's see if you can apply a similar transformation to the histogram.
+
+- [Create Multiple Plots in One Image Output](http://lightonphiri.org/blog/ggplot2-multiple-plots-in-one-graph-using-gridextra)
+
+- [Add Log or Sqrt Scales to an Axis](http://docs.ggplot2.org/current/scale_continuous.html)
+- [Assumptions of Linear Regression](http://en.wikipedia.org/wiki/Linear_regression#Assumptions)[Normal Distribution](http://en.wikipedia.org/wiki/Normal_distribution)
+
+Let's create three histograms on one output plot. And to do that you needed to install the grid extra package and load it into R Studio. 
+
+```r
+install.packages('gridExtra')
+library(gridExtra)
+```
+
+Once you've got that, now it's just a matter of creating each of the three histograms. And saving them to three variables. I'll use p1, p2 and p3 for each of the plots that I'm going to create. 
+
+```r
+p1 <- qplot(x = friend_count, data = pf)
+p2 <- qplot(x = log10(friend_count + 1), data = pf)
+p3 <- qplot(x = sqrt(friend_count), data = pf)
+```
+
+Now the first histogram is the same as before. We just have `friend_count`, pass to `x`, and `pf`, pass to `data`. For the second histogram, we'll take the log10 of `friend_count`. And remember to add 1 to it first, so that we don't get any undefined results. And finally for our third histogram, we'll simply take the square root of `friend_count`. Now, if I run all these lines of code, I can see that I create three new variables that  saves each of my plots. And now I just need to pass each of these plots to grid dot arrange. 
+
+```R
+grid.arrange(p1, p2, p3, ncol = 1)
+```
+
+And set `ncol` equal to 1, since I just want one column with all my histograms. And running my code, I can see that I get all three histograms. And here's a closer view of the three. Notice that our second plot is much better. Since we have a normalish kind of distribution. The square root transform is also better than no transformation at all, since we don't have as much of a long tail.
+
+![pf_3_histo_grid](./img/pf_3_histo_grid.png)
+
+We do still have a long tail, it's just that much lower friend count since we transformed the variable. The tilt's just not as bad as before. Now there was another way to create these same three histograms using a different type of syntax. Now ths syntax is a little more complicated at first. 
+
+This time, we're going to use the `ggplot` syntax to create our histogram. `ggplot` is very similar to the `qplot()`, since it still takes the same parameters, x and data. 
+
+```r
+p1 <- ggplot(aes(x = friend_count), data = pf) + geom_histogram()
+```
+
+The key differnece is that we need to include any x or y variables inside this aesthetic wrapper or AES. The other thing we need to do is we need to tell `ggplot()` what type of plot we want to create. Or what kind of geom we want. The geom that we want is geom histogram. Running this bit of code I can see that I get my original hitogram. Which is the first one we created on `friend_count`. RUnning the entire line I can save this hitogram into `p1`. Now I've got a plot that I can just alter using scales. So for the second plot, I'm going to take my first plot and just add a `scale_x_log10` to it. This is going to transform the x-axis, or the x variable, using log base 10. Similarly, for the third graph, I'm going to add scale x square root. Now, I don't want to use `p2` here, since I've already got a scale log 10 on it. I want to use my original graph, `p1`. And add scale x square root.
+
+```r
+p2 <- p1 + scale_x_log10()
+p3 <- p1 + scale_x_sqrt()
+```
+
+Now saving all these plots and writing our `grid.arrange()` function, we get the same output as we had before.
+
+```r
+grid.arrange(p1, p2, p3, ncol = 1)
+```
+
+Now there is a slight difference here based on the x-axis labelling.
+
+![pf_3_histo_grid_ggplot](./img/pf_3_histo_grid_ggplot.png)
+
+### Add a Scaling Layer
+
+```r
+logScale <- qplot(x = log10(friend_count), data = pf)
+
+countScale <- ggplot(aes(x = friend_count), data = pf) + geom_histogram() + scale_x_log10()
+```
+
+Let's look at the differences between these two plots and see what the two adjustments really do. I'm going to save this first plot into `logScale` and I'm going to save the second plot into `countScale`. I'm going to use each of these variables and pass it to `grid.arrange`, so that way I can plot them side by side, and that's why the `ncal` is equal to two. 
+
+```r
+grid.arrange(logScale, countScale, ncol = 2)
+```
+
+Running this code, we can see that we get our two histograms.
+
+![pf_added_scaling_layer_grid](./img/pf_added_scaling_layer_grid.png)
+
+When looking at the two plots, we can see that the difference is really in the x axis labeling. Using `scale_x_log10` will label the axis in actual `friend_counts`. Whereas using the log10 wrapper will label the x axis in log units. This is just something to keep in mind as you make more plots. In general, I think it's easier to think about actual counts, so that's why I prefer using the `scale_x_log10` as a layer.
+
+> Equivalent ggplot code:
+>
+> ```r
+> ggplot(aes(x = friend_count), data = pf) + 
+>   geom_histogram() +
+>   scale_x_log10()
+> ```
+
+### Frequency Polygons
+
+So far we've seen how to examine a variables distribution using histograms, and how to check our hunches with visualizations and numerical summaries. But there's another type of plot that lets us compare distributions, and it's called the frequency polygon. Frequency polygons are similar to histograms, but they draw a curve connecting the counts in a histogram. So this allows us to see the shape and the peaks of our distribution in more detail. You might remember from before that we were looking at `friend_count` using this code. 
+
+```r
+qplot(x = friend_count, data = subset(pf, !is.na(gender)), binwidth = 10) + scale_x_continuous(lim = c(0,1000), breaks = seq(0, 1000, 50)) + facet_wrap(~gender)
+```
+
+This code gives a histogram of our user's `friend_counts`, and then we added a `facet_wrap()` and broke it out by gender. Remember we were trying to answer the question, who on average has more friends, men or women. 
+
+![pf_freq_polygons_plot](./img/pf_before_frepoly_plot.png)
+
+We said we couldn't tell based on this histogram, so we ran some numerical summaries instead. And instead of having these 2 histograms side by side, we can actually use a frequency polygon and overlay these histograms together. Here's how we can create that frequency polygon. I'll copy and paste the same code, except I need to make an addition. 
+
+```r
+qplot(x = friend_count, data = subset(pf, !is.na(gender)), binwidth = 10, geom = 'freqpoly', color = gender) + scale_x_continuous(lim = c(0,1000), breaks = seq(0, 1000, 50))
+```
+
+By default q plot's going to create a histogram when I pass it just one single variable. So I need to tell it to create a frequency polygon instead. I can use the geom parameter to do that. Here, I'll pass it frequency polygon, so that way we create a different type of plot, and I won't need this facet wrap by gender anymore. To get the distributions of each gender on the plot, I'm going to pass the parameter color to q plot and set it equal to gender. So here's my color parameter, and now I'm going to pass it gender. When I run this code, I get one plot with 2 frequency polygons one for males and one for females.
+
+![pf_freqpoly_plot](./img/pf_freqpoly_plot.png)
+
+ And notice how gender has been assigned a color, so color is indicating which frequency polygon I'm on. And this is what the frequency polygon is really good for. We can compare 2 or more distributions at once, but again, this plot doesn't really answer our question who has more friends on average men or women. Let's change the y-axis to show proportions instead of raw counts. This is going to involve some funky syntax, so I want to explain it. To change this count variable, we're going to pass in y to our `qplot()` function. I'm going to assign the parameter `y` this expression. 
+
+```r
+qplot(x = friend_count, y = ..count../sum(..count..) ,data = subset(pf, !is.na(gender)), xlab = 'Friend Count', ylab = 'Propportion of Users with that friend count', binwidth = 10, geom = 'freqpoly', color = gender) + scale_x_continuous(lim = c(0,1000), breaks = seq(0, 1000, 50))
+```
+
+This allows me to get proportions instead of the actual raw counts on the y-axis. And I'm just move this around so that way my code looks a little bit cleaner. And finally, let me change the labels to more accurately explain the plot. Alright, it looks like I have everything. Let's run this code and see the differences.
+
+![pf_frepoly_labeled_plot](./img/pf_frepoly_labeled_plot.png)
+
+ Zooming in on the plot, we can see that we've changed the y-axis scale, and we have our labels appearing. And while it may appear that males have higher friend counts on average than women, we can see that many males or a high percentage of them have low friend counts. It's probably in this tail region of the graph where females overtake males. 
+
+Remember, our goal in analyzing this Facebook user data is to understand our users and their behavior. In this case, we're wondering whether or not males or females end up using likes on the World Wide Web more often. So, first I'm just going to remind myself of what variables are in my data set. I'm wanting to compare likes between the genders, so I'm going to use `www_likes`. 
+
+```r
+qplot(x = www_likes, data = subset(pf, !is.na(gender)), geom = 'freqpoly')
+```
+
+This code would give me a histogram which isn't what I want. And remember I also need to subset my data to remove any values for gender that are in a. Now this bit of code is starting to look more like what I want. But, I've only got one frequency polygon on here, and I need two. 
+
+![pf_one_freqpoly_plot](./img/pf_one_freqpoly_plot.png)
+
+So I'm going to use the color parameter, and pass a gender.
+
+```r
+qplot(x = www_likes, data = subset(pf, !is.na(gender)), geom = 'freqpoly', color = gender)
+```
+
+That seems a little bit better.
+
+![pf_two_freqpoly_plot](./img/pf_two_freqpoly_plot.png)
+
+I'm also going to add `scale_x_continuous()`, since I know that World Wide Web likes is on a continuous scale. Alright, now we're looking at a reasonable plot. Zooming in, it looks like males typically have more likes on the web. But I can't really make sense of the tail end of this graph. This is long tail data, so let's use a log transformation to see if we can get a better look at what's happening down here.
+
+```r
+qplot(x = www_likes, data = subset(pf, !is.na(gender)), geom = 'freqpoly', color = gender) + scale_x_continuous() + scale_x_log10()
+```
+
+ I'm going to go back to my code and add a `scale_x_log_10`. Running this code we get a different plot with much more information. 
+
+![pf_continuous_freqpoly_plot](./img/pf_continuous_freqpoly_plot.png)
+
+It looks like males have more likes on the web at first, but we can see that females overtake males at this point in the graph.
+
+### Likes on the Web
+
+The `by()` command is going to allow us to answer those question. 
+
+> - What's the `www_likes` count for males?
+> - Which gender has more `www_likes`?
+
+So first I'm going to create an r block of code and I'm going to use the by command. I'll pass a `www_likes` as the first parameter and then I'll pass gender as the second, since that's the variable I would have split our `www_likes` over. I want to total of likes for each gender, so I'm going to use the sum function here. 
+
+```r
+by)pf$www_likes, pf$gender, sum)
+```
+
+Writing this code we can see our output. The likes for males is at 1430175. But it's the females that have way more likes. There are over three and a half million.
+
+| female  |  male   |
+| :-----: | :-----: |
+| 3507665 | 1430175 |
+
+It looks like females have more than two times the number of likes as men. And while this might seem trivial, information like this can help websites or other businesses decide which features are used most often by different subgroups. This might help a business or a website decide which feature they should continue to invest in, or which ones they should just leave behind.
