@@ -951,7 +951,7 @@ The `by()` command is going to allow us to answer those question.
 So first I'm going to create an r block of code and I'm going to use the by command. I'll pass a `www_likes` as the first parameter and then I'll pass gender as the second, since that's the variable I would have split our `www_likes` over. I want to total of likes for each gender, so I'm going to use the sum function here. 
 
 ```r
-by)pf$www_likes, pf$gender, sum)
+by(pf$www_likes, pf$gender, sum)
 ```
 
 Writing this code we can see our output. The likes for males is at 1430175. But it's the females that have way more likes. There are over three and a half million.
@@ -961,3 +961,58 @@ Writing this code we can see our output. The likes for males is at 1430175. But 
 | 3507665 | 1430175 |
 
 It looks like females have more than two times the number of likes as men. And while this might seem trivial, information like this can help websites or other businesses decide which features are used most often by different subgroups. This might help a business or a website decide which feature they should continue to invest in, or which ones they should just leave behind.
+
+### Box Plots
+
+Let's use another type of visualization that's helpful for seeing the distribution of a variable called a box plot. You may recall earlier that we split friend count by gender in a pair of histograms using `facet_wrap()`. The code looked like this. 
+
+```r
+qplot(x = friend_count, data = subset(pf, !is.na(gender)), binwidth = 25) + scale_x_continuous(lim = c(0,1000), breaks = seq(0, 1000, 50)) + facet_wrap(~gender)
+```
+
+Instead of using these histograms we're going to generate box plots of `friend_count` by `gender`, so we can quickly see the differences between the distributions. And in particular we're going to see the difference between the median of the two groups. And remember again the the `qplot()` function automatically generates histograms when we pass it a single variable. So we need to add a parameter to tell `qplot()` that we want a different type of plot. To do that, we're going to use the `geom` called box plot. 
+
+```r
+qplot(x = gender, y = friend_count, data = subset(pf, !is.na(gender)), geom = 'boxplot')
+```
+
+Now, I'm going to use the same data set as before. So I'm going to keep this and `qplot()`. Now, what's different about box plots is that the y axis is going to be our friend count. The x axis, on the other hand, is going to be our categorical variables for male and female, or gender. Notice that we use the continuous variables. `friend_count` as `y`. And the grouping, or the categorical variable as `x`. This will always be true for your box plots. I forgot a parenthesis here and then let me just reformat my code so it looks a little bit cleaner. There we go.  Running this code, we can see that we get our two box plots. Let's zoom in to get a closer look. 
+
+![pf_box_plot](./img/pf_box_plot.png)
+
+The boxes here and here cover the middle 50% of values, or what's called the inner quartile range. And I know these boxes are hard to see, since we have so many outliers on this plot. Each of these tiny little dots is an outlier in our data. We can also see that the y axis is capturing all the friend counts from zero all the way up to 5,000. So we're not omitting any user data in this plot. And finally, this horizontal line, which you may have noticed at first, is the median for the two box plots. And you might be wondering what makes an outlier an actual outlier. And well, we usually consider outliers to be just outside of, one and a half times the IQR from the media. Since there's so many outliers in these plots, let's adjust our code to focus on just these two boxes.
+
+```r
+qplot(x = gender, y = friend_count, data = subset(pf, !is.na(gender)), geom = 'boxplot', ylim = c(0,1000))
+```
+
+To change what our box plots look like, we just need to adjust the Y axis. We can use the `ylim` parameter inside of `qplot()`  to do so. Here, I can set the upper and lower limits. The lower limit will be 0 and the upper limit will be 1000. Now, you may or may not have gotten a warning message here about removing data points. When we use the `ylim` parameter, we're actually removing data points from our calculations. So the original box plots that we have might look slightly different from this. Another way to create the same plot is to use the `scale_y_continuous()` layer. So we can use this same bit of code here and then just close off our parenthesis. Adding the `scale_y_continuous()` layer, I can set the limits to be between 0 and 1000. 
+
+```r
+qplot(x = gender, y = friend_count, data = subset(pf, !is.na(gender)), geom = 'boxplot') + scale_y_continuous(limits = c(0, 1000))
+```
+
+Running this code, we can see that we get the same exact box plots. 
+
+![pf_box_adjust_y)axis_plot](./img/pf_box_adjust_y_axis_plot.png)
+
+What I want to draw your attention to, is the female box plot. Notice how the top of the box is just below 250. So this value might be around 200 or 230. But this value might not be accurate for all of our data. When we use the `ylim` paramater or the `scale_y_continuous()` layer, we actually remove data points from calculations. So a better way to do this is to use the `coord_cartesian()` layer to set the y limits instead. So, we'll use the same bit of code and then instead of adding `scale_y_continuous()` layer, we'll add the `coord_cartesian()` layer.
+
+```R
+qplot(x = gender, y = friend_count, data = subset(pf, !is.na(gender)), geom = 'boxplot') + coord_cartesian(ylim = c(0,1000))
+```
+
+And here I'll set the y limits from 0 to a 1000. Notice how the top of the box has moved slightly closer to 250 for females. 
+
+![pf_box_plot_with_coord_cartesian](./img/pf_box_plot_with_coord_cartesian.png)
+
+What the bottom of the box means. And what this black line means.
+
+> [How to read and use a Boxplot](http://flowingdata.com/2008/02/15/how-to-read-and-use-a-box-and-whisker-plot/)
+>
+> The [interquartile range or IQR](http://en.wikipedia.org/wiki/Interquartile_range) includes all of the values between the bottom and top of the boxes in the boxplot.
+>
+> [Visualization](http://en.wikipedia.org/wiki/File:Boxplot_vs_PDF.svg) of the IQR with a normal probability distribution function with μ=1μ=1 and σ2=1σ2=1 (pdf).
+>
+> [Intro to Descriptive Statistics Exercise: Match Box Plots](https://classroom.udacity.com/courses/ud827/lessons/1471748603/concepts/834179180923)
+
