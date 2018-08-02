@@ -53,6 +53,22 @@ Reference: [StackOverflow](https://stackoverflow.com/questions/9689104/installin
 >
 > `Sys.setlocale('LC_ALL', 'ko_KR.UTF-8')`
 
+
+
+### Pipe Operator Error in dplyr
+
+![pipe_operator](./img_issue/pipe_operator.png)
+
+```
+could not find function "%.%"
+```
+
+**Solve:**
+
+Please note that in newer versions of dplyr (0.3.x+), the syntax `%.%` has been deprecated and replaced with `%>%`.
+
+
+
 ## WARNING
 
 ### Warning message: package 'ggplot'
