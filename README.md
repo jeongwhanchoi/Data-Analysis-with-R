@@ -34,8 +34,25 @@ This link is the **[main document](https://github.com/jeongwhanchoi/Data-Analysi
   - [Box Plots](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#box-plots)
   - [Box Plots, Quartiles and Friendships](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#box-plots-quartiles-and-friendships)
   - [Getting Logical](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#getting-logical)
-
-
+- [Explore Two Variables](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#explore-two-variables)
+  - [Scatterplots](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#scatterplots)
+  - [ggplot Syntax](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#ggplot-syntax)
+  - [Overplotting](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#overplotting)
+  - [coord_trans()](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#coord_trans)
+  - [Alpha and Jitter](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#alpha-and-jitter)
+  - [Overplotting and Domain Knowledge](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#overplotting-and-domain-knowledge)
+  - [Conditional Means](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#conditional-means)
+  - [Overlaying Summaries with Raw Data](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#overlaying-summaries-with-raw-data)
+  - [Correlation](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#correlation)
+  - [Correlation on Subsets](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#correlation-on-subsets)
+  - [Correlation Methods](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#correlation-methods)
+  - [Create Scatterplots](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#create-scatterplots)
+  - [Strong Correlations](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#strong-correlations)
+  - [More Caution with Correlation](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#more-caution-with-correlation)
+  - [Noisy Scatterplots](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#noisy-scatterplots)
+  - [Making Sense of Data](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#making-sense-of-data)
+  - [A New Perspective](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#a-new-perspective)
+  - [Understanding Noise: Age to Age Months](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#understanding-noise-age-to-age-months)
 
 ### [Issues](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/r_issue.md)
 
