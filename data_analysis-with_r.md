@@ -1453,7 +1453,7 @@ Here we have a different test statistic called row, and notice how our value is 
 
 Let's continue our investigation by looking at some variables that are highly correlated. This time we'll look at the number of likes users received from friends on the desktop version on the site. 
 
-![names_pf](/Users/jeongwhanchoi/GitHub/Data-Analysis-with-R/img/names_pf.png)
+![names_pf](./img/names_pf.png)
 
 This is the `www_likes_received`. We'll compare this variable to the total number of likes users received which is the `likes_received` variable. Now you could of course get `likes_received` through the mobile version but we're not going to look at that here. So now I'm going to hand it off to you. I want you to create a scatter plot of this variable versus this variable and it should make sense that `likes_received` should be higher than `www_likes_received`. Since some of the `likes` may be coming from other sources, either mobile or unknown.
 
