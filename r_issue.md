@@ -7,6 +7,7 @@
   - [Pipe Operator Error in dplyr](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/r_issue.md#pipe-operator-error-in-dplyr)
 - [WARNING](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/r_issue.md#warning)
   - [Warning message: package 'ggplot'](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/r_issue.md#warning-message-package-ggplot)
+  - [Syntax warning in 'geom_line'](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/r_issue.md#Syntax-warning-in-geom_line)
 
 ---
 
@@ -105,3 +106,32 @@ This warning can NOT be solved by updating RStudio like the screenshots below.
 ![ggplot_warning_solve_1](./img_issue/ggplot_warning_note.png)
 
 This update DOES NOT UPDATE your version of R, so you should update R via [**HERE**](https://stat.ethz.ch/pipermail/r-help/2018-March/451633.html).
+
+
+
+### Syntax warning in geom_line
+
+```r
+ggplot(aes(x = age, y = friend_count), data = pf) + xlim(13, 90) + geom_point(alpha = 0.05, position = position_jitter(h=0), color = 'orange')+ coord_trans(y = 'sqrt') + geom_line(stat = 'summary', fun.y = mean) + geom_line(stat = 'summary', fun.y = quantile, probs = .1, linetype = 2 , color = 'blue')
+```
+
+```
+Warning: Ignoring unknown parameters: probs
+```
+
+**Solve:**
+
+- Put the `probs = .1` parameter in the `fun.args` argument like below
+  - `fun.args = list(probs = .1)`
+
+```r
+ggplot(aes(x = age, y = friend_count), data = pf) + xlim(13, 90) + geom_point(alpha = 0.05, position = position_jitter(h=0), color = 'orange')+ coord_trans(y = 'sqrt') + geom_line(stat = 'summary', fun.y = mean) + geom_line(stat = 'summary', fun.y = quantile, fun.args = list(probs = .1), linetype = 2 , color = 'blue')
+```
+
+**Note**: ggplot 2.0.0 changes the syntax for parameter arguments to functions when using `stat = 'summary'`. To denote parameters that are being set on the function specified by `fun.y`, use the `fun.args`argument, e.g.:
+
+```r
+ggplot( ... ) +
+  geom_line(stat = 'summary', fun.y = quantile,
+            fun.args = list(probs = .9), ... )
+```
