@@ -53,6 +53,9 @@ This link is the **[main document](https://github.com/jeongwhanchoi/Data-Analysi
   - [Making Sense of Data](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#making-sense-of-data)
   - [A New Perspective](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#a-new-perspective)
   - [Understanding Noise: Age to Age Months](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#understanding-noise-age-to-age-months)
+  - [Age with Months Means](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#age-with-months-means)
+  - [Noise in Conditional Means](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#noise-in-conditional-means)
+  - [Smoothing Conditional Means](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#smoothing-conditional-means)
 
 ### [Issues](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/r_issue.md)
 
