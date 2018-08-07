@@ -1639,3 +1639,138 @@ pf$age_with_months <- pf$age + (12 - pf$dob_month) / 12
 ```
 
 To convert age to age with months, we know we'regoing to need to add some fraction to the `age` variable. Since there are 12 months in a year, we know 12 will be the denominator. Now, let's think carefully about `age`. For a given year, someone who was born in March would be older than someone born in September. So we need to subtract the birth month from 12 to reflect this. This should make sense, since someone born in March would be born on the third month of the year. So our numerator here would be seven. So for the 36 year old born in March, their age would be 36.75. If the user was born in September and was also 36, then the user's age would be 36.25. So let's run this bit of code and convert our age variable, measured in years, to age with months. And it looks like I made amistake. I forgot to include my data frame for DOB month.
+
+### Age with Months Means
+
+We're on our way to plotting the conditional means for a to months. Remember we're trying to generate this plot again but only for smaller bin widths. 
+
+![pf_mean_scatterplot_01](./img/pf_mean_scatterplot_01.png)
+
+We'll have more data points since age will be measured in months rather than in years. Now that we've got our age with months variable from before we can go ahead and use the d apply R functions. To get a new data frame with an average friend count. And the median friend count for each age with months. 
+
+Create a new data frame called `pf.fc_by_age_months` that contains the mean friend count, the median friend count, and the number of users in each group of age with months.
+
+The goal is to create a similar data frame to the `fc_by_age` one. This time though, we wanted it to have friend counts by age months instead of age years. Here's one solution that you might have done, by chaining the operations of `dplyr` together. So first, I want to make sure that the library is loaded and then I'm going to create my data frame, `pf.fc_by_age_months`. So, I'm going to take my original data frame and apply a bunch of functions to it, from the `dplyr` package. 
+
+```r
+library(dplyr)
+pf.fc_by_age_months <- pf %>%
+	group_by(age_with_months) %>%
+	summarise(friend_count_mean = mean(friend_count), friend_count_median = median(friend_count), n = n()) %>%
+arrange(age_with_months)
+```
+
+First, I'll group by age with months, then I'll chain on a new command called `summarize`, and here I want to summarize by friend count mean, and friend count median, and the number of users in my group. And finally, I'll chain on one more command that will arrange my data frame by age with months. Running this command, I can see that I have my new data frame. 
+
+![fc_by_age_month_new_dataframe](./img/fc_by_age_month_new_dataframe.png)
+
+Notice too, that I have a lot more observations. And that should make sense, because I went from age years to age months. And just to be sure, I'll print out a couple rows on my data frame to examine it. 
+
+```r
+head(pf.fc_by_age_months)
+```
+
+There's my age measured in months, my friend count mean, my friend count median, and n, the number of users in each group. 
+
+| age_with_months | friend_count_mean | friend_count_median |  n   |
+| :-------------: | :---------------: | :-----------------: | :--: |
+|    13.16667     |     46.33333      |        30.5         |  6   |
+|    13.25000     |     115.07143     |        23.5         |  14  |
+|    13.33333     |     136.20000     |        44.0         |  25  |
+|    13.41667     |     164.24242     |        72.0         |  33  |
+|    13.50000     |     131.17778     |        66.0         |  45  |
+|    13.58333     |     156.81481     |        64.0         |  54  |
+
+Now, there was another way to get the same data frame. Let's see how we can do that. Instead of chaining the commands together, I can use the data frame and then apply commands to it. So first, I'll create `age_with_months.groups`. I'll use that using the `group_by()` command. I'll pass it my data frame, and then I want to group, by `age_with_months`. That's the variable. Now that I have my groups, I want to summarize them using mean friend count, median friend count, and in, which is the number of users in each group. 
+
+```r
+age_with_months_groups <- group_by(pf, age_with_months)
+pf.fc_by_age_months2 <- summarise(age_with_months_groups, friend_count_mean = mean(friend_count), friend_count_median = median(friend_count), n = n())
+pf.fc_by_age_months2 <- arrange(pf.fc_by_age_months2, age_with_months)
+```
+
+So here I'll summarize `age_with_months`, and I'll save it into this new variable. Now that I have my groups, I want to summarize them using the `summarize` command. I'll create a new data frame called, `pf.fc_by_age_months2`. I want to summarize this data frame, since it's already in groups. So I'll pass it here. `age_with_month_groups`. Now I just need to add the variables that I want to summarize. I want the mean of friend count, so I'll save that to a variable, I want the median friend count so I'll also save that to a variable. And finally I want the number of users in each age group. Now I just want to take this data frame and arrange it by age_with_months. So I'll pass this data frame into the arrange function, and then I'll tell it to arrange by age_with_months. Notice, too, that I'm saving this new data frame into our old data frame, so I'm just writing it over. Running all this code, we can see that we get our new data frame, and we can also check it just by using our `head()` function. 
+
+```r
+head(pf.fc_by_age_months2)
+```
+
+Sure enough, the same exact data frame.
+
+### Noise in Conditional Means
+
+We've got our data frame, with our conditional means measured in months. Now it's just time to plot them. 
+
+```r
+ggplot(aes(x = age_with_months, y = friend_count_mean), data = subset(pf.fc_by_age_months, age_with_months < 71)) + geom_line()
+```
+
+We need to create a similar scatter plot that had friend count mean against age with months. We'll use `ggplot` to create our figure. I'll pass `age_with_months` to `x`, and I'll pass `friend_count_mean` to `y`. And then I just need to remember to wrap this in `aes()`. Now comes the data frame. I need to be careful that I don't use pseudo Facebook users, since I really want this data frame that we just created. Now that I've got my data frame, I need to subset it. I'll only take the users whose age with months is less then 71. Then, I'll tell `ggplot` what type of geom I want, in this case `geom_line`. 
+
+![noise_conditional_means_plot](./img/noise_conditional_means_plot.png)
+
+So here's our much nosier plot, a `friend_count_mean` versus age with months.
+
+### Smoothing Conditional Means
+
+In this section, we created two plots for conditional means. Let's take a closer look at both of the plots and see how they're different. This second block of code gave us this plot. And this first block of code gave us this plot. Now, you subset this data frame to only consider uses who are age 71 or less. So, let's do the same up here. 
+
+```r
+ggplot(aes(x = age, y = friend_count_mean), data = pf.fc_by_age, age < 71) + geom_line()
+```
+
+Running the code, we can see that we're limiting our x axis.
+
+![limit_x_71_plot](./img/limit_x_71_plot.png)
+
+Now, what I want to do is put these two plots side by side so we can look at them together. Now, you know this before, we basically just say, each plot into a variable, and then we plot those variables in one column.
+
+```r
+p1 <- ggplot(aes(x = age, y = friend_count_mean), data = pf.fc_by_age, age < 71) + geom_line()
+
+p2 <- ggplot(aes(x = age_with_months, y = friend_count_mean), data = subset(pf.fc_by_age_months, age_with_months < 71)) + geom_line()
+
+library(gridExtra)
+grid.arragne(p2, p1, ncol = 1)
+```
+
+So, here's the difference between age and age with months. 
+
+![grid_arrange_conditional_means](./img/grid_arrange_conditional_means.png)
+
+By decreasing the size of our bins and increasing the number of bins, we have less data to estimate each conditional mean. We can see that the noise is a lot worse on this graph since we have finer bin choices. On the other hand, we could go the other direction and increase the size of the bins. Say, we could lump everyone together whose age falls under a multiple of five. Essentially what we'll do is, we'll cut our graph in pieces and average these mean friend counts together. So, users who are within two and a half years of 40 will get lumped into one point. The same will be true for users who are within two and a half years of 50 and for users who are in two and a half years of 60. I'll show you what I mean in code. 
+
+```r
+p3 <- ggplot(aes(x = round(age / 5) * 5, y = friend_count), data = subset(pf, age < 71)) + geom_line(stat = 'summary', fun.y = mean)
+```
+
+Here, I'm creating a plot with age that's been divided by five, rounded and then multiplied by five. I've also subsetted our data frame, just like the other plots. The last thing I'll do is I'll add a `geom_line()` with a stat summary. I don't really want to plot the `friend_count`, I want to plot the `mean_friend_count`. So I'll pass `summary` to `stat`, and I'll pass `mean` to `fun.y`. I'll save this plot, and add it in with the others. 
+
+```r
+grid.arrange(p2, p1, p3, ncol = 3)
+```
+
+So, see how we have less data points here? 
+
+![grid_extra_three_plot](./img/grid_extra_three_plot.png)
+
+And wider bin widths. By doing this, we would estimate the mean more precisely, but potentially miss important features of the age and friend count relationship. These three plots are an example of the bias variance tradeoff, and it's similar to the tradeoff we make when choosing the bin width in histograms. One way that analysts can better make this trade off is by using a flexible statistical model to smooth our estimates of conditional means. `ggplot` makes it easier fit such models using `geom_smooth()`. So, instead of seeing all this noise, we'll have a smooth modular function that will fit along the data. We will do the same for this plot as well. Here, I've added the geom smooth layer to both our first plot and our second plot. 
+
+```r
+p1 <- ggplot(aes(x = age, y = friend_count_mean), data = pf.fc_by_age, age < 71) + geom_line() + geom_smooth()
+
+p2 <- ggplot(aes(x = age_with_months, y = friend_count_mean), data = subset(pf.fc_by_age_months, age_with_months < 71)) + geom_line() + geom_smooth()
+
+p3 <- ggplot(aes(x = round(age / 5) * 5, y = friend_count), data = subset(pf, age < 71)) + geom_line(stat = 'summary', fun.y = mean)
+```
+
+I'm just using `ggplot`'s defaults so all the decisions about what model we'll be using will be made for us. So, I'll save these two plots and then I'll run the code again. 
+
+![conditional_means_geom_smooth](./img/conditional_means_geom_smooth.png)
+
+So, here's our smoother for `age_with_months`, and here's our smoother for age. While the smoother captures some of the features of this relationship, it doesn't draw attention to the non-motonic relationship in the low ages well. Not only that, but it really misses the discontinuity at age 69. This highlights that using models like low S or smoothing splines can be useful. But, like nearly any model, it can be subject to systematic errors, when the true process generating our data isn't so consistent with the model itself. Here the models are based on the idea that true function is smooth. But, we really know that there's some discontinuity in the relationship.
+
+> [Local Regression (LOESS)](http://simplystatistics.org/2014/02/13/loess-explained-in-a-gif/) explained visually on the [Simply Statistics](http://simplystatistics.org/) blog.
+>
+> The Details of [Loess and Lowess](http://en.wikipedia.org/wiki/Local_regression)
+
