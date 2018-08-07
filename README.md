@@ -56,6 +56,16 @@ This link is the **[main document](https://github.com/jeongwhanchoi/Data-Analysi
   - [Age with Months Means](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#age-with-months-means)
   - [Noise in Conditional Means](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#noise-in-conditional-means)
   - [Smoothing Conditional Means](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#smoothing-conditional-means)
+- [Explore Many Variable](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#explore-many-variable)
+  - [Third Qualitative Variable](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#third-qaulitative-variable)
+  - [Reshaping Data](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#reshaping-data)
+  - [Third Quantitative Variable](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#third-quantitative-variable)
+  - [Cut a Variable](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#cut-a-variable)
+  - [Plotting It All Together](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#plotting-it-all-together)
+  - [Plot the Grand Mean](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#plot-the-grand-mean)
+  - [Friending Rate](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#friending-rate)
+  - [Friendships Initiated](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#friendships-initiated)
+  - [Bias Variance Trade off Revisited](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#bias-variance-trade-off-revisited)
 
 ### [Issues](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/r_issue.md)
 
