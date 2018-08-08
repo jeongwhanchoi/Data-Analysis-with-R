@@ -2021,3 +2021,221 @@ So R will automatically choose the appropriate statistical methods based on our 
 
 > [Understanding the Bias-Variance Tradeoff](http://scott.fortmann-roe.com/docs/BiasVariance.html)
 
+---
+
+### Introducing the Yogurt Dataset
+
+> Download the [yogurt data set](https://s3.amazonaws.com/udacity-hosted-downloads/ud651/yogurt.csv).
+>
+> [Bayesian Statistics and Marketing](http://www.perossi.org/home/bsm-1) contains the data set and a case study on it.
+>
+> The citation for the original paper on the yogurt data set is Kim, Jaehwan, Greg M. Allenby, and Peter E. Rossi. "Modeling consumer demand for variety." Marketing Science 21.3 (2002): 229-250.
+>
+> A special thanks to Professor Allenby for helping us understand this data set.
+>
+> To learn more about scanner data, check out [Panel Data Discrete Choice Models of Consumer Demand](http://www.nuff.ox.ac.uk/Economics/papers/2013/Panel%20Data%20Demand%20-%20June%2020,%202013.pdf)
+
+### Histograms Revisited
+
+This yogurt data set contains over 2000 observations. For nine different variables. 
+
+```r
+yo <- read.csv('yogurt.csv')
+str(yo)
+```
+
+The observations are for households that buy Dannon yogurt over time. 
+
+![yo_df](./img/yo_df.png)
+
+Now one thing that you might notice is that most of the variables in here are integers.
+
+**Change the id from an int to a factor** 
+
+```r
+yo$id <- factor(yo$id)
+str(yo)
+```
+
+But I want to convert one of the variables to a `factor`, and that's the `id` variable. We'll see how this comes in handy later in the course. But just make sure it says factor right here on your data set as well. If `id` doesn't say` factor` for the type of variable, make sure you run this command in order to change `id` to a `factor` variable. 
+
+![yo_df_convert_to_factor](./img/yo_df_convert_to_factor.png)
+
+One of the first plots you created was a histogram, so let's see what this one looks like. 
+
+```r
+qplot(data = yo, x = price, fill = I('#F79420'))
+```
+
+We can immediately notice some important discreetness to this distribution. There appear to be prices at which there are many observations, but then no observations in adjacent prices. This makes sense if prices are set in a way that applies to many of the consumers. 
+
+![yo_histo_no_binwidth](./img/yo_histo_no_binwidth.png)
+
+There are some purchases that involve much lower prices, and if we are interested in price sensitivity, we definitely want to consider what sort of variations is in these prices. 
+
+```r
+qplot(data = yo, x = price, fill = I('#F79420'), binwidth = 10)
+```
+
+Now, I also want you to note that if we chose a different bin width we might obscure this discreetness. Say if I chose a bandwidth equal to ten. In this histogram, we would miss the observation for some of the empty spaces for the adjacent prices. So, it's no surprise that for this very discreet data this histogram is a very biased model.
+
+![yo_histo_binwidth](./img/yo_histo_binwidth.png)
+
+### Number of Purchases
+
+There are other ways we could have noticed this important feature of the data set. But, there are also other ways, that by jumping into a different analysis, we might have missed this. For example, if we just look at a five number summary of the data, we might not notice this so easily. 
+
+```r
+summary(yo)
+```
+
+One clue to the discreteness is that the 75th percentile is the same as the maximum. 
+
+![summary_yo](./img/summary_yo.png)
+
+We could also see this discreteness by looking at how many distinct prices there are in the data set. 
+
+![unique_yo_price](./img/unique_yo_price.png)
+
+So here it looks like there's about 20 different prices. 
+
+![table_yo_price](./img/table_yo_price.png)
+
+Tabling the variable we get an idea of the distributionlike we saw in the histogram. So now that we know something about the price, let's figure out on a given purchase occasion how many eight ounce yogurts does a household purchase. To answer this we need to combine accounts of the different yogurt flavors into one variable. For example, for this particular household, on one purchase occasion, they bought three different types of yogurt. To figure this out for all the households, we need to make use of a new function. The function is called the `transform()` function.
+
+We needed to create the variable all purchases and add it to our yo data frame. 
+
+```r
+yo <- transform(yo, all.purchases = strawberry + blueberry + pina.colada + plain + mixed.berry)
+```
+
+The transform function takes in a data frame and allows us to add different variables to it by recombining variables that are already within the data frame. So here I'll create the variable `all.purchases` and then I'll set it equal to the sum of all the yogurt flavors `strawberry`, `blueberry`, `pina.colda`, `plain`, and `mixed.berry`. When I run the code, I can see that my number of variables changed. And, just to be sure, I can print a summary of this variable as well. You might have also used this code. 
+
+### Prices Over Time
+
+```r
+qplot(x = all.purchases, data = yo, binwidth = 1, fill = I('#099DD9'))
+```
+
+Now that we have an extra column, our variable and our data frame, we can create a histogram of it. 
+
+![allpurchaseqplot](./img/allpurchaseqplot.png)
+
+This histogram reveals that most households buy one or two yogurts at a time. To dive deeper into our yogurt prices and household behavior. Let's investigate the price over time in more detail. 
+
+I'm showing you the `ggplot` code to create the scatter plot of price versus time. 
+
+```r
+ggplot(aes(x = time, y = price), data = yo) + geom_jitter(alpha = 1/4, shape = 21, fill = I('#F79420'))
+```
+
+Now, I've added `geom_jitter()` here. So, that way, my points will show up a little bit transparent. And I'll color them with an orange hue. 
+
+![yo_time_price_geom_jitter](./img/yo_time_price_geom_jitter.png)
+
+Looking at the plot, we can that the modal or the most common prices, seem to be increasing over time. We also see some lower price points scattered about the graph. These may be due to sales or, perhaps, buyers using coupons that bring down the price of yogurt.
+
+###  Looking at Samples of Households
+
+Let's cut up the exploration Dean just described. First, we should use the set seed function to make this reproducible. 
+
+```r
+set.seed(4230)
+sample.ids <- sample(levels(yo$id), 16)
+```
+
+Running this one line of code will also allow you to see the same households in my explorations, if you use the same seed number. Now, let's sample 16 of the households from our yogurt data set, from yogurt `id`. Notice that I'm sampling from the levels because those are all of the different households that I have. I'll run the code for the sample `id`'s. And then, I'll print out the sample `id`'s. There's the 16 of them.
+
+```r
+ggplot(aes(x = time, y = price), data = subset(yo, id %in% sample.ids)) + facet_wrap( ~ id) + geom_line() + geom_point(aes(size = all.purchases), pch = 1)
+```
+
+Now we can plot each purchase occasion for each of the households that we sampled. We have the time of the purchase, the `price` per `item` of the yogurt, and the number of items. Here, I'm using the size parameter to add more detail to my plot. I'm passing at the `all.purchases` variable, so that way I can consider the number of items in terms of size of the point on the plot. Here's the plot.
+
+![allpurchases_geom_line_point](./img/allpurchases_geom_line_point.png)
+
+Notice how we get panels for each of the households that we had in our sample. From these plots, we can see the variation and how often each household buys yogurt. Here, a lot and here, not to much. And it seems that some household purchases more quantities than others with these larger circles indicating not here. For most of the households, the price of yogurt holds steady, or tends to increase over time. Now, there are, of course, some exceptions, like in this household and in this household, and even here, we might think that the household is using coupons to drive the price down. Now, we don't have the coupon data to associate with this buying data, but you could see how that information could be paired to this data to better understand the consumer behavior.
+
+> **Note**: `x %in% y` returns a logical (boolean) vector the same length as x that says whether each entry in x appears in y. That is, for each entry in x, it checks to see whether it is in y. This allows us to subset the data so we get all the purchases occasions for the households in the sample. Then, we create scatterplots of price vs. time and facet by the sample id. 
+
+### The Limits of Cross Sectional Data
+
+![allpurchases_geom_line_point](./img/allpurchases_geom_line_point.png)
+The general idea is that if we have observations over time, we can facet by the primary unit, case, or individual in the data set. For our yogurt data it was the households we were faceting over. This faceted time series plot is something we can't generate with our pseudo Facebook data set. Since we don't have data on our sample of users over time. Let's get back to that plot to see that limitation. 
+
+![image-20180808152953501](./img/geom_smooth_year_joined.png)
+
+The Facebook data isn't great for examining the process of friending over time. The data set is just a cross section, it's just one snapshot at a fixed point that tells us the characteristics of individuals. Not the individuals over, say, a year. But if we had a dataset like the yogurt one, we would be able to track friendships initiated over time and compare that with tenure. This would give us better evidence to explain the difference or the drop in friendships initiated over time as tenure increases.
+
+### Scatterplot Matrices
+
+We should let the data speak to determine variables of interest. There's a tool that we can use to create a number of scatter plots automatically. It's called a scatterplot matrix. In a scatterplot matrix. 
+
+```r
+#install.packages(GGally)
+library(GGally)
+theme_set(theme_minimal(20))
+```
+
+There's a grid of scatterplots between every pair of variables. As we've seen, scatterplots are great, but not necessarily suited for all types of variables. For example, categorical ones. So there are other types of visualizations that can be created instead of scatter plots. Like box plots or histograms when the variables are categorical. Let's produce the scatter plot matrix for our pseudo Facebook data set. We're going to use the `GGally` package to do so. So make sure you've installed it and then go ahead and load it using the library command. Now, I'm also going to set the theme here too. 
+
+```r
+# set the seed for reproducible results
+set.seed(1836)
+pf_subset <- pf[, c(2:15)]
+names(pf_subset)
+ggpairs(pf_subset[sample.int(nrow(pf_subset), 1000), ])
+```
+
+Now, there's two other things that we want to do. First we want to set the seed so we get reproducible results. Now, you might be wondering why we set the `seed` in the first place. And it's because we're going to sample from our data set. Our data set contains all these variables and I actually don't want all the variables. I don't want `userid`, `year_joined`, or `year_joined.bucket`. So what I can do is subset my data frame and then sample from that sub set. If I check out the variables in my subset data frame these are the ones of interest. Now I didn't use `year_joined` or `year_joined.bucket`, because this one's a categorical variable and really these were derived from tenure. Now I'm ready to use the `ggpairs()` function inside of `GGally` to create this scatter plot matrix. 
+
+> Here's the [scatterplot matrix](https://s3.amazonaws.com/udacity-hosted-downloads/ud651/scatterplotMatrix.pdf) as a pdf.
+
+![ggpairs_scatterplots](./img/ggpairs_scatterplots.png)
+
+The `ggpairs()` function uses a different plot type for different types of combinations of variables. Hence, we have histograms here and we have scatter plots here. Many of these plots aren't quite as nice as they would be if we fine-tuned them for the particular variables. For example, for all the counts of likes, we might want to work on a logarithmic scale. But, `ggpairs()` doesn't do this for us. At the very least, a scatter plot matrix can be a useful starting point in many analyses.
+
+### Even More Variables
+
+```r
+nci <- read.table('nci.tsv')
+
+#changing the colnames to produce a nicer plot
+colnames(nci) <- c(1:64)
+```
+
+Examples arise in many areas, but one that has attracted the attention of statisticians is genomic data. In these data sets, they're often thousands of genetic measurements for each of a small number of samples. In some cases, some of these samples have a disease, and so we'd like to identify genes that are associated with the disease. In the instructor notes, you'll find a data set of gene expression in tumors. The data contains the expression of 6,830 genes, compared with a larger baseline reference sample. Now, this is a ton of data. So let's go ahead and read in the data set, and then I'll change the color names of the data set to be the numbers from one to 64. Now, I'm just doing this so that way the plot that I create is going to be a little bit nicer with the labeling on the x axis.
+
+### Heat Maps
+
+The last plot that we'll make for this course is called a Heat Map. For our data set we want to display each combination of gene and sample case, the difference in gene expression and the sample from the base line. We want to display combinations where a gene is over expressed in red. in combinations where it is under expressed in blue. Here's the code to make that Heat Map. 
+
+```r
+# melt the data to long format
+library(reshape2)
+nci.long.samp <- melt(as.matrix(nci[1:200, ]))
+names(nci.long.samp) <- c('gene', 'case', 'value')
+head(nci.long.samp)
+```
+
+First, we'll run all of this in order to melt our data to a long format. 
+
+```r
+# make the heat map
+ggplot(aes(y = gene, x = case, fill = value), data = nci.long.samp) + geom_tile() + scale_fill_gradientn(colors = colorRampPalette(c('blue', 'red'))(100))
+```
+
+And then we just run our `ggplot` code using the `geom_tile()`. Now, this last line is going to give us a scale gradient. And we're going to use the colors from blue to red. So, let's see what the output looks like. And, there's our Heat Map. 
+
+![nci_heatmap](./img/nci_heatmap.png)
+
+Even with such a dense display, we aren't looking at all the data. In particular, we're just showing the first 200 genes. That's 200 genes of over 6,000 of them. And since this data set was produced. Genomic data sets of these kind, sometimes called micro data are only getting larger, and more complex. What's most interesting, is that other data sets also look like this. For example, internet companies run lots of randomized experiments. Where in the simplest versions, users are randomly assigned to a treatment like a new version of a website or some sort of new feature or product or a control condition. Then the difference in outcome between the treatment and control can be computed for a number of metrics of interest. In many situations, there might have been hundreds or thousands of experiments and hundreds of metrics. This data looks very similar to the genomic data in some ways. And this is why the useful maxim plot all the data might not always apply to a data set as it did to most of this course.
+
+>[Melt data frames in R](http://www.r-bloggers.com/melt/) 
+
+---
+
+
+
+
+
