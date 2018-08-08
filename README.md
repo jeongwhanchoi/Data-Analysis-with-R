@@ -66,6 +66,15 @@ This link is the **[main document](https://github.com/jeongwhanchoi/Data-Analysi
   - [Friending Rate](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#friending-rate)
   - [Friendships Initiated](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#friendships-initiated)
   - [Bias Variance Trade off Revisited](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#bias-variance-trade-off-revisited)
+  - [Introducing the Yogurt Dataset](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#introducing-the-yogurt-dataset)
+  - [Histograms Revisited](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#histograms-revisited)
+  - [Number of Purchases](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#number-of-purchases)
+  - [Prices Over Time](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#prices-over-time)
+  - [Looking at Samples of Households](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#looking-at-samples-of-households)
+  - [The Limits of Cross Sectional Data](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#the-limits-of-cross-sectional-data)
+  - [Scatterplot Matrices](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#scatterplot-matrices)
+  - [Even More Variables](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#even-more-variables)
+  - [Heat Maps](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/data_analysis-with_r.md#heat-maps)
 
 ### [Issues](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/r_issue.md)
 
