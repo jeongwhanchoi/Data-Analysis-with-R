@@ -71,6 +71,29 @@ Please note that in newer versions of dplyr (0.3.x+), the syntax `%.%` has been 
 
 
 
+### The Deprecated Argument Error in GGally
+
+![GGally_depreciate_argument_error](./img_issue/GGally_depreciate_argument_error.png)
+
+```
+Error in stop_if_params_exist(params) : 
+  'params' is a deprecated argument.  Please 'wrap' the function to supply arguments. help("wrap", package = "GGally")
+```
+
+**Solve**:
+
+- Change the `params` argument to the `shape` like below.
+
+```r
+ggpairs(diamond_samp, shape = c(shape = I('.'), outlier.shape = I('.')))
+```
+
+**Note:**
+
+The `params` argument to the `ggpairs` function are there to change the  `shape` of the plotted points in the plot matrix,  to make them easier to see.
+
+
+
 ## WARNING
 
 ### Warning message: package 'ggplot'
