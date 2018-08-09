@@ -2237,5 +2237,152 @@ Even with such a dense display, we aren't looking at all the data. In particular
 
 
 
+## Diamonds & Price Prediction
 
+### Scatter Plot Review
+
+All we're doing is we're using qplot to plot the price of diamond against its carat weight. And we're going to trim the top percentile off of both `carat` and `price`. 
+
+```r
+qplot(data = diamonds, x - carat, y = price, xlim = c(0, quantile(diamonds$carat, 0.99)), ylim = c(0, quantile(diamonds$price, 0.99))) + geom_point(fill = I('#F79420'), color = I('black'), shape = 21)
+```
+
+If you use the full `ggplot` syntax, the code will look something like this.
+
+![diamonds_scatterplot](./img/diamonds_scatterplot.png)
+
+### Price and Carat Relationship
+
+When we look at the plot, a few things pop out right away. We can see a nonlinear relationship. Maybe it's exponential or maybe it's something else. We can see that the dispersion or variance of the relationship also increases as carat size increases. With just a quick look at the data we've learned two important things about the functional relationship between price and carat size. We can add a linear trim line to the plot by using the `stat_smooth()` function with method equals `lm`. 
+
+```r
+ggplot(data = diamonds, aes(x = carat, y = price)) + geom_point(color = '#F79420', alpha 1/4) + stat_smooth(method = 'lm') + scale_x_continuous(lim = c(0, quantile(diamonds$carat, 0.99))) + scale_y_continuous(lim = c(0, quantile(diamonds$price, 0.99)))
+```
+
+We can see that the linear trend line doesn't go through the center of the data at some key places. 
+
+![diamonds_scatterplot_relationship](./img/diamonds_scatterplot_relationship.png)
+
+It misses it here. It should curve a little bit in the center of the relationship, and it should slope up more toward the end. And if we tried to use this to make predictions, we might be off for some key places inside and outside of the existing data that we have displayed.
+
+### ggpairs Function
+
+The first thing you might consider doing is plotting key variables against each other using the `ggpairs()` function. This function plots each variable against each other variable, pairwise. You may want to sample first, otherwise the function will take a long time to render the plots. Also, if your data set has more then about 10 columns, there will be too many plotting windows. So, subset on your columns first if that's the case. 
+
+```r
+# install these if necessary
+install.packages('GGally')
+install.packages('scales')
+install.packages('memisc')
+install.packages('lattice')
+install.packages('MASS')
+install.packages('car')
+install.packages('reshape')
+install.packages('plyr')
+```
+
+The first thing we want to do is make sure you have these packages installed. We use `GGally` for this particular plot. We use scales for a variety of things. `memisc` to summarize the regression. `lattice` for few other things. `MASS` for various functions. `car` to recode variables. Reshape to reshape and wrangle your data. `plyr` to create interesting summaries and transmissions that you've done. We'll go ahead and load these packages, and then set the seed for randomization purposes and sample 10,000 rows from the diamonds data set. 
+
+```r
+# load the ggplot graphics package and the others
+library(ggplot2)
+library(GGally)
+library(scales)
+library(memisc)
+```
+
+What's happening is that `ggpairs()` is plotting each variable against the other in a pretty smart way.
+
+```r
+# sample 10,000 diamonds from the data set
+set.seed(20022012)
+diamond_samp <- diamonds[sample(1:length(diamonds$price), 10000), ]
+ggpairs(diamond_samp, params = c(shape = I('.'), outlier.shape = I('.')))
+```
+
+In the lower triangle of the plot matrix, it uses grouped histograms for qualitative, qualitative pairs and scatter plots for quantitative, quantitative pairs. 
+
+![diamonds_ggpairs_scatterplot](./img/diamonds_ggpairs_scatterplot.png)
+
+In the upper triangle, it plots grouped histograms for qualitative, qualitative pairs, this time using the x instead of the y variable as the grouping factor. Box plots for qualitative, quantitative pairs, and it provides the correlation for quantitative quantitative pairs. Remember that our goal is to understand the price of diamonds. So, let's focus on that. The price variable is here. So, let's look at the relationships that correspond to price. 
+
+We can see what might be relationships between price and clarity and price and color, which we'll keep in mind for later when start modelling our data. You might remember this when you create the box plots in problem set three. Be that as it may, the critical factor driving price is the size, or the carat weight of the diamond. As we saw at the start of the lesson, the relationship between price and diamond size is nonlinear. 
+
+![diamonds_scatterplot](./img/diamonds_scatterplot.png)
+
+What might explain this pattern? On the supply side, larger continuous chunks of diamonds without significant flaws are probably harder to find than smaller ones. This might help explain the sort of exponential looking curve. 
+$$
+\text{Weight}  \approx f(\text{Volume}) \approx f(x\cdot y\cdot z)
+$$
+Of course, this is related to the fact that the weight of a diamond is a function of volume, and volume is a function of the length times the width times the height of a diamond, and this suggests that we might be especially interested in the cube root of carat weight.
+$$
+\sqrt[3]{\text{carat} \space \text{weight}} 
+$$
+It's often the case, that leveraging substantive knowledge about your data like this can lead to especially fruitful transformations.
+
+### The Demand of Diamonds
+
+Here we're just using `qplot` to produce two histograms of price. 
+
+```r
+plot1 <- qplot(data = diamonds, x = price, binwidth = 100, fill = I('#099DD9')) + ggtitle('Price')
+
+plot2 <- qplot(data = diamonds, x = price, binwidth = 0.01, fill = I('#F79420')) + ggtitle('Price (log10)') + scale_x_log10()
+```
+
+One on just a regular scale and one on the log ten scale. We're to use this `gridExtra` library to plot both plots 
+
+```r
+library(gridExtra)
+library(grid)
+grid.arrange(plot1, plot2, ncol = 2)
+```
+
+and here's what the result looks like.
+
+![demand_of_diamonds](./img/demand_of_diamonds.png)
+
+> [Log Transformations](http://www.r-statistics.com/2013/05/log-transformations-for-skewed-and-wide-distributions-from-practical-data-science-with-r/)
+
+### Scatterplot Transformation
+
+Now that we have a better understanding of our variables, and the overall demand for diamonds, let's replot the data. 
+
+```r
+qplot(carat, price, data = diamonds) + scale_y_continuous(trans = log10_trans()) + ggtitle('Price (log10) by Carat')
+```
+
+This time we'll put price on a log10 scale, and here's what it looks like. 
+
+![diamonds_scatterplot_trans](./img/diamonds_scatterplot_trans.png)
+
+This plot looks better than before. On the log scale, the prices look less dispersed at the high end of Carat size and price, but actually we can do better. Let's try using the cube root of `carat` in light of our speculation about flaws being exponentially more likely in diamonds with more volume. Remember, volume is on a cubic scale. 
+
+```r
+# Create a new function to transform the carat variable
+cuberoot_trans = function() trans_new('cuberoot', transform = function(x) x^(1/3), inverse = function(x) x^3)
+```
+
+First, we need a function to transform the `carat` variable. If you'd like to learn more about writing your own functions in R, check out the links in [this notes](https://www.youtube.com/watch?v=Z1wB1rHAYzQ&list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP). This may seem like a lot of code, but really, there's only one new piece here. It's this `cuberoot_trans()`  function. It's a function that takes the cube root of any input variable, and it also has an inverse function to undo that operation, which we need to display the plot correctly. 
+
+```r
+# Use the cuberoot_trans function
+ggplot(aes(carat, price), data = diamonds) + geom_point() + scale_x_continuous(trans = cuberoot_trans(), limits = c(0.2, 3), breaks = c(0.2, 0.5, 1, 2, 3)) + scale_y_continuous(trans = log10_trans(), limits = c(350, 15000), breaks = c(350, 1000, 5000, 10000, 15000)) + ggtitle('Price (log10) by Cube-Root of Carat')
+```
+
+Then when we get to our actual `ggplot` command. What we'll do is we'll use the `scale_x_continuous` argument to transform the x axis with this cube root transformation function.  Keep in mind we're also transforming the y axis with this log10 transformation that we discussed previously. And, let's see what this plot looks like. 
+
+![diamonds_scatterplot_transformation](./img/diamonds_scatterplot_transformation.png)
+
+Taking a look at the plot, we can actually see that with these transformations that we used to get our data on this nice scale. Things look almost linear. We can now move forward and see about modelling our data using just a linear model.
+
+### Overplotting Revisited
+
+```r
+ggplot(aes(carat, price), data = diamonds) + geom_point(alpha = 0.5, size = 0.75, position = 'jitter') + scale_x_continuous(trans = cuberoot_trans(), limits = c(0.2, 3), breaks = c(0.2, 0.5, 1, 2, 3)) + scale_y_continuous(trans = log10_trans(), limits = c(350, 15000), breaks = c(350, 1000, 5000, 10000, 15000)) + ggtitle('Price (log10) by Cube-Root of Carat')
+```
+
+After making these 3 adjustments, you can see that the plot gives us a better sense of how dense and how sparse our data is at key places.
+
+![diamonds_overplotting](./img/diamonds_overplotting.png)
 
