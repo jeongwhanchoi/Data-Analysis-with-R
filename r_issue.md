@@ -5,6 +5,7 @@
 - [ERROR](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/r_issue.md#error)
   - [LOCALE ERROR](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/r_issue.md#locale-error)
   - [Pipe Operator Error in dplyr](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/r_issue.md#pipe-operator-error-in-dplyr)
+  - [The Deprecated Argument Error in GGally](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/r_issue.md#the-deprecated-argument-error-in-ggally)
 - [WARNING](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/r_issue.md#warning)
   - [Warning message: package 'ggplot'](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/r_issue.md#warning-message-package-ggplot)
   - [Syntax warning in 'geom_line'](https://github.com/jeongwhanchoi/Data-Analysis-with-R/blob/master/r_issue.md#Syntax-warning-in-geom_line)
