@@ -2386,3 +2386,111 @@ After making these 3 adjustments, you can see that the plot gives us a better se
 
 ![diamonds_overplotting](./img/diamonds_overplotting.png)
 
+### Price vs Carat and Clarity
+
+Let's see if clarity, cut, or color can explain some of the variants in price when we visualize it on our plot using color.
+
+```r
+#install.packages('RColorBrewer', dependencies = TRUE)
+library(RColorBrewer)
+
+ggplot(aes(x = carat, y = price, color = clarity), data = diamonds) + geom_point(alpha = 0.5, size = 1, position = 'jitter') + scale_color_brewer(type = 'div', guide = guide_legend(title = 'Clarity', reverse = TRUE, override.aes = list(alpha = 1, size = 2))) + scale_x_continuous(trans = cuberoot_trans(), limits = c(0.2, 3), breaks = c(0.2, 0.5, 1, 2, 3)) + scale_y_continuous(trans = log10_trans(), limits = c(350, 15000), breaks = c(350, 1000, 5000, 10000, 15000)) + ggtitle('Price (log10) vs\nCube Root of Carat and Clarity')
+```
+
+We just need to add one parameter to our aesthetic wrapper in `ggplot` like so. Set the color parameter for equal to clarity. And when we run it, here's what it looks like. 
+
+![diamonds_carat_price_clarity](./img/diamonds_carat_price_clarity.png)
+
+#### Clarity and Price
+
+Clarity does seem to explain an awful lot of the remaining variance in price, after adding color to our plot. Holding carat weight constant, we're looking at one part of the plot. We see the diamonds with lower clarity are almost always cheaper than diamonds with better clarity.
+
+### Price vs Carat and Cut
+
+You might have made just one change to the code by swapping out the cut variable with the Clarity variable.
+
+```r
+ggplot(aes(x = carat, y = price, color = cut), data = diamonds) + geom_point(alpha = 0.5, size = 1, position = 'jitter') + scale_color_brewer(type = 'div', guide = guide_legend(title = 'Cut', reverse = TRUE, override.aes = list(alpha = 1, size = 2))) + scale_x_continuous(trans = cuberoot_trans(), limits = c(0.2, 3), breaks = c(0.2, 0.5, 1, 2, 3)) + scale_y_continuous(trans = log10_trans(), limits = c(350, 15000), breaks = c(350, 1000, 5000, 10000, 15000)) + ggtitle('Price (log10) vs\nCube Root of Carat and Cut')
+```
+
+Running the code, here is the plot that we get.
+
+![price_carat_cut](./img/price_carat_cut.png)
+
+#### Cut and Price
+
+We don't see much variation on cut. Most of the diamonds in the data are ideal cut anyway, so we've lost the color pattern that we saw before.
+
+### Price vs Carat and Color
+
+I replaced cut with color in the aesthetic wrapper. I also changed the legend title and the plot title, to use the word color. And finally, I removed the reverse parameter in the legend, so that the best color would be at the top of the list in the legend. 
+
+```r
+ggplot(aes(x = carat, y = price, color = color), data = diamonds) + geom_point(alpha = 0.5, size = 1, position = 'jitter') + scale_color_brewer(type = 'div', guide = guide_legend(title = 'Color', reverse = FALSE, override.aes = list(alpha = 1, size = 2))) + scale_x_continuous(trans = cuberoot_trans(), limits = c(0.2, 3), breaks = c(0.2, 0.5, 1, 2, 3)) + scale_y_continuous(trans = log10_trans(), limits = c(350, 15000), breaks = c(350, 1000, 5000, 10000, 15000)) + ggtitle('Price (log10) vs\nCube Root of Carat and Color')
+```
+
+Now that we've run our code, this is the output.
+
+![price_carat_color](./img/price_carat_color.png)
+
+#### Color and Price
+
+Color does seem to explain some of the variance in price. Just like we saw with the clarity variable. Blue now however, states that the difference between all color grades from D to J are basically not noticeable to the naked eye. Yet, we do see the color difference in the price tag.
+
+### Linear Models in R
+
+In R we can create models using the `lm()` function. We need to supply a formula in the form of `y~x`. Here, `y` is the outcome variable and `x` is the explanatory variable. 
+
+Remember we applied the log transformation to our long tailed dollar variable, and we speculated that the flawless diamond should become exponentially rarer as diamond volume increases. So we should be interested in the cube root of carat weight.
+$$
+\log(\text{price}) ~ carat^{1/3}
+$$
+
+### Building the Linear Model
+
+Let's buildup our linear model for price. I'm going to store the first model in a variable called `m1`. 
+
+```r
+m1 <- lm(I(log(price)) ~ I(carat^(1/3)), data = diamonds)
+m2 <- update(m1, ~ . + carat)
+m3 <- update(m2, ~ . + cut)
+m4 <- update(m3, ~ . + color)
+m5 <- update(m4, ~ . + clarity)
+mtable(m1, m2, m3, m4, m5, sdigits = 3)
+```
+
+In this case, it tells R to use the expression inside the I function to transform a variable before using it in the regression. This is instead of instructing R to interpret these symbols as part of the formula to construct the design matrix for the regression. 
+
+I can also update the previous model to add the `carat` variable in the regression, using the syntax. The real functional relationship is surely not as simple as the cubed root of `carat`, so we add a simple linear function of caret in our model predicting price. And we can continue to make more complex models by adding more variables. We add `cut` even though we don't expect it to have much influence on price. Next, we add `color` to a fourth model and `clarity` to a fifth. When we run the code, we can see that we're getting some very nice R square values. We're accounting for almost all of the variance in price using the four Cs. If we want to know whether the price for, a diamond is reasonable, we might now use this model.
+
+![lm_result](./img/lm_result.png)
+
+### Model Problems
+
+$$
+ln(\text{price}) = 0.415 + 9.144 \cdot \sqrt[3]{\text{carat}}-1.093\cdot\text{carat}+\\(…\cdot\text{cut}+…\text{color}+…\cdot\text{clarity})+\mathcal{E}
+$$
+
+Our model is the log of price equals 0.415 plus 9.144 times the cube root of carat, minus 1.093 times carat plus a series of coefficient times each factor in cut another series of coefficient times each factor in color. And another series of coefficients times each factor in clarity plus an error term. 
+
+- What could be some problems when using this model? What else should we think about when we're using it?
+  - 2008 -> 2014
+  - inflation
+  - 2008 global recession
+  - diamond market in china
+  - uneven recovery/price increase across different carat weight
+
+> [Diamond Prices over the Years](http://www.pricescope.com/diamond-prices/diamond-prices-chart)
+>
+> [Global Diamond Report](http://www.bain.com/publications/articles/global-diamond-report-2013.aspx)
+>
+> [Falling Supply and Rising Demand: Couples in Shanghai take to the Ring](http://diamonds.blogs.com/diamonds_update/diamond-prices/) 
+
+> [Interpreting Regression Coefficients in R](http://www.r-bloggers.com/interpreting-regression-coefficient-in-r/?utm_source=feedburner&utm_medium=email&utm_campaign=Feed%3A+RBloggers+%28R+bloggers%29) on R Bloggers
+>
+> [Interpreting Regression Coefficients](http://www.theanalysisfactor.com/interpreting-regression-coefficients/) on the Analysis Factor blog
+>
+> [Fitting and Interpreting Linear Models](http://blog.yhathq.com/posts/r-lm-summary.html) by ŷhat
+>
+> [Another Explanation of Factor Coefficients in Linear Models](http://stats.stackexchange.com/a/24256) on Stats StackExchange
+
