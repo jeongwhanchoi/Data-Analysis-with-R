@@ -2494,3 +2494,62 @@ Our model is the log of price equals 0.415 plus 9.144 times the cube root of car
 >
 > [Another Explanation of Factor Coefficients in Linear Models](http://stats.stackexchange.com/a/24256) on Stats StackExchange
 
+### A Bigger, Better Data Set
+
+```r
+install.packages('RCurl')
+install.package('bitops')
+library('RCurl')
+library('bitops')
+diamondsurl = getBinaryURL("https://raw.github.com/solomonm/diamonds-data/master/BigDiamonds.Rda")
+load(rawConnection(diamondsurl))
+```
+
+What we will do first is make a variable called logged price, the log of diamond price. And then we will build our model similarly to the way that we did for the small diamond status set. Notice that we're setting price by diamonds who's price is less than $10,000 and who's certificate is G.I.A.. Thankfully our models look quite a bit like they did for the smaller diamond status set. Although our r squared values are just a touch weaker.
+
+```r
+diamondsbig$logprice = log(diamondsbig$price)
+m1 <- lm(logprice ~ I(carat^(1/3)), data=diamondsbig[diamondsbig$price < 10000 & diamondsbig$cert == "GIA",])
+m2 <- update(m1, ~ . + carat)
+m3 <- update(m2, ~ . + cut)
+m4 <- update(m3, ~ . + color)
+m5 <- update(m4, ~ . + clarity)
+mtable(m1, m2, m3, m4, m5)
+```
+
+![mtable](./img/mtable.png)
+
+### Predictions
+
+```r
+thisDiamond = data.frame(carat = 1.00, cut = "V.Good", color = "I", clarity="VS1")
+modelEstimate = predict(m5, newdata = thisDiamond, interval="prediction", level = .95)
+```
+
+The results yield an expected value for price given the characteristics of our diamond, and the upper and lower bounds of a 95% confidence level. Note, because this is a linear model, predict is just multiplying each model coefficient by each value in our data. It turns out that this diamond is a touch pricier than the expected value under the full model, though it is by no means outside of the 95% confidence interval. Blue now has by most accounts a better reputation than diamond SE.info however. And reputation is worth a lot in a business that relies on easy to forge certificates in which the non-expert can be easily fooled. So, while this model might give you a sense of whether your diamond is a ripoff against diamondSE.info diamonds, it's not clear that diamondSE.info should be regarded as the universal source of truth over whether the price of a diamond is reasonable. Nonetheless, to have the expected price and diamondassay.info with a 95% interval, is a lot more information than we had about the price we should be willing to pay for a diamond before we started this exercise.
+
+```r
+exp(modelEstimate)
+```
+
+|      |   fit    |   lwr   |   upr    |
+| :--: | :------: | :-----: | :------: |
+|  1   | 5040.436 | 3730.34 | 6810.638 |
+
+> **[Confidence Intervals](http://en.wikipedia.org/wiki/Confidence_interval)**
+>
+> The prediction interval here may be slightly conservative, as the model errors are heteroskedastic over carat (and hence price) even after our log and cube-root transformations. 
+>
+> See the output of the following code.
+>
+> ```r
+> dat = data.frame(m4$model, m4$residuals)
+> 
+> with(dat, sd(m4.residuals))
+> 
+> with(subset(dat, carat > .9 & carat < 1.1), sd(m4.residuals))
+> 
+> dat$resid <- as.numeric(dat$m4.residuals)
+> ggplot(aes(y = resid, x = round(carat, 2)), data = dat) +
+>   geom_line(stat = "summary", fun.y = sd)
+> ```
