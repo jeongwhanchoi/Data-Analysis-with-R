@@ -1,0 +1,170 @@
+# Explore Many Variables
+
+```{r}
+library(ggplot2)
+
+pf <- read.csv('pseudo_facebook.tsv', sep = '\t')
+```
+
+## Third Qualitative Variable
+
+```{r}
+ggplot(aes(x = gender, y = age), data = subset(pf, !is.na(gender))) + geom_boxplot() + stat_summary(fun.y = mean, geom = 'point', shape = 4)
+
+ggplot(aes(x = age, y = friend_count), data = subset(pf, !is.na(gender))) + geom_line(aes(color = gender), stat = 'summary', fun.y = median)
+```
+
+```{r}
+library(dplyr)
+# chain functions %>%
+pf.fc_by_age_gender <- pf %>%
+	group_by(age,gender) %>%
+	summarise(mean_friend_count = mean(friend_count), median_friend_count = median(friend_count), n = n()) %>%
+	ungroup() %>%
+	arrange(age)
+```
+
+## Plotting Conditional Summaries
+```{r}
+ggplot(aes(x = age, y = median_friend_count), data = pf.fc_by_age_gender) + geom_line(aes(color = gender))
+```
+### Wide and Long Format
+```{r}
+pf.fc_by_age <- pf %>%
+	group_by(age) %>%
+	summarise(friend_count_mean = mean(friend_count), friend_count_median = median(friend_count), n = n()) %>%
+	arrange(age)
+
+head(pf.fc_by_age, 11)
+```
+## Reshaping in Data
+```{r}
+install.packages('reshape2')
+library(reshape2)
+```
+```{r}
+pf.fc_by_age_gender.wide <- dcast(pf.fc_by_age_gender, age ~ gender, value.var = 'median_friend_count')
+
+head(pf.fc_by_age_gender.wide)
+```
+## Ratio Plot
+
+```{r}
+ggplot(aes(x = age, y = female / male), data = pf.fc_by_age_gender.wide) + geom_line() + geom_hline(yintercept = 1, alpha = 0.3, linetype = 2)
+```
+
+## Third Quantitative Variable
+```{r}
+pf$year_joined <- floor(2014 - pf$tenure/365)
+```
+
+## Cut a Variable
+```{r}
+summary(pf$year_joined)
+table(pf$year_joined)
+```
+```{r}
+pf$year_joined.bucket <- cut(pf$year_joined, c(2004, 2009, 2011, 2012, 2014))
+```
+
+## Plotting It All Together
+```{r}
+table(pf$year_joined.bucket, useNA = 'ifany')
+
+ggplot(aes(x = age, y = friend_count), data = subset(pf, !is.na(gender))) + geom_line(aes(color = gender), stat = 'summary', fun.y = median)
+
+ggplot(aes(x = age, y = friend_count), data = subset(pf, !is.na(year_joined.bucket))) + geom_line(aes(color = year_joined.bucket), stat = 'summary', fun.y = median)
+```
+## Plot the Grand Means
+```{r}
+ggplot(aes(x = age, y = friend_count), data = subset(pf, !is.na(year_joined.bucket))) + geom_line(aes(color = year_joined.bucket), stat = 'summary', fun.y = mean) + geom_line(stat = 'summary', fun.y = mean, linetype = 2)
+```
+## Friending Rate
+```{r}
+with(subset(pf, tenure >= 1), summary(friend_count / tenure))
+```
+## Friendships Initiated
+```{r}
+ggplot(aes(x = tenure, y = friendships_initiated / tenure), data = subset(pf, tenure >= 1)) + geom_line(aes(color = year_joined.bucket))
+```
+## Bias Variance Trade off Revisited
+```{r}
+ggplot(aes(x = tenure, y = friendships_initiated / tenure), data = subset(pf, tenure >= 1)) + geom_smooth(aes(color = year_joined.bucket))
+```
+# Yogurt
+```{r}
+yo <- read.csv('yogurt.csv')
+str(yo)
+```
+
+```{r}
+# Change the id from an int to a factor
+yo$id <- factor(yo$id)
+str(yo)
+```
+```{r}
+qplot(data = yo, x = price, fill = I('#F79420'))
+
+qplot(data = yo, x = price, fill = I('#F79420'), binwidth = 10)
+```
+## Number of Purchases
+```{r}
+summary(yo)
+unique(yo$price)
+length(unique(yo$price))
+table(yo$price)
+```
+```{r}
+yo <- transform(yo, all.purchases = strawberry + blueberry + pina.colada + plain + mixed.berry)
+```
+
+## Prices over Time
+```{r}
+qplot(x = all.purchases, data = yo, binwidth = 1, fill = I('#099DD9'))
+```
+```{r}
+ggplot(aes(x = time, y = price), data = yo) + geom_jitter(alpha = 1/4, shape = 21, fill = I('#F79420'))
+```
+## Looking at Samples of Households
+```{r}
+set.seed(4230)
+sample.ids <- sample(levels(yo$id), 16)
+```
+
+```{r}
+ggplot(aes(x = time, y = price), data = subset(yo, id %in% sample.ids)) + facet_wrap( ~ id) + geom_line() + geom_point(aes(size = all.purchases), pch = 1)
+```
+## Scatterplots Matrices
+```{r}
+#install.packages(`GGally`)
+library(GGally)
+theme_set(theme_minimal(20))
+```
+
+```{r}
+# set the seed for reproducible results
+set.seed(1836)
+pf_subset <- pf[, c(2:15)]
+names(pf_subset)
+ggpairs(pf_subset[sample.int(nrow(pf_subset), 1000), ])
+```
+
+## Even More Variables
+```{r}
+nci <- read.table('nci.tsv')
+
+#changing the colnames to produce a nicer plot
+colnames(nci) <- c(1:64)
+```
+
+## Heat Map
+```{r}
+# melt the data to long format
+library(reshape2)
+nci.long.samp <- melt(as.matrix(nci[1:200, ]))
+names(nci.long.samp) <- c('gene', 'case', 'value')
+head(nci.long.samp)
+
+# make the heat map
+ggplot(aes(y = gene, x = case, fill = value), data = nci.long.samp) + geom_tile() + scale_fill_gradientn(colors = colorRampPalette(c('blue', 'red'))(100))
+```
