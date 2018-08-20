@@ -1,0 +1,142 @@
+# Diamonds & Price Predictions
+
+## Scatterplot review
+
+```{r}
+diamonds <- read.csv('diamondsbig.csv', sep = '\t')
+library('ggplot2')
+data(diamonds)
+```
+
+```{r}
+qplot(data = diamonds, x = carat, y = price, xlim = c(0, quantile(diamonds$carat, 0.99)), ylim = c(0, quantile(diamonds$price, 0.99))) + geom_point(fill = I('#F79420'), color = I('black'), shape = 21)
+```
+
+## Price and Carat Relationship
+```{r}
+ggplot(data = diamonds, aes(x = carat, y = price)) + geom_point(color = '#F79420', alpha = 1/4) + stat_smooth(method = 'lm') + scale_x_continuous(lim = c(0, quantile(diamonds$carat, 0.99))) + scale_y_continuous(lim = c(0, quantile(diamonds$price, 0.99)))
+```
+## ggpairs()
+```{r}
+# install these if necessary
+install.packages('GGally')
+install.packages('scales')
+install.packages('memisc')
+install.packages('lattice')
+install.packages('MASS')
+install.packages('car')
+install.packages('reshape')
+install.packages('plyr')
+```
+
+```{r}
+# load the ggplot graphics package and the others
+library(ggplot2)
+library(GGally)
+library(scales)
+library(memisc)
+```
+```{r}
+# sample 10,000 diamonds from the data set
+set.seed(20022012)
+diamond_samp <- diamonds[sample(1:length(diamonds$price), 10000), ]
+ggpairs(diamond_samp, shape = c(shape = I('.'), outlier.shape = I('.')))
+```
+## The Demand of Diamonds 
+```{r}
+plot1 <- qplot(data = diamonds, x = price, binwidth = 100, fill = I('#099DD9')) + ggtitle('Price')
+
+plot2 <- qplot(data = diamonds, x = price, binwidth = 0.01, fill = I('#F79420')) + ggtitle('Price (log10)') + scale_x_log10()
+
+library(gridExtra)
+library(grid)
+grid.arrange(plot1, plot2, ncol = 2)
+```
+## Scatterplot Transformation
+```{r}
+qplot(carat, price, data = diamonds) + scale_y_continuous(trans = log10_trans()) + ggtitle('Price (log10) by Carat')
+```
+
+### Create a new function to transform the carat variable
+```{r}
+cuberoot_trans = function() trans_new('cuberoot', transform = function(x) x^(1/3), inverse = function(x) x^3)
+```
+
+### Use the cuberoot_trans function
+```{r}
+ggplot(aes(carat, price), data = diamonds) + geom_point() + scale_x_continuous(trans = cuberoot_trans(), limits = c(0.2, 3), breaks = c(0.2, 0.5, 1, 2, 3)) + scale_y_continuous(trans = log10_trans(), limits = c(350, 15000), breaks = c(350, 1000, 5000, 10000, 15000)) + ggtitle('Price (log10) by Cube-Root of Carat')
+```
+## Overplotting Revisited
+```{r}
+ggplot(aes(carat, price), data = diamonds) + geom_point(alpha = 0.5, size = 0.75, position = 'jitter') + scale_x_continuous(trans = cuberoot_trans(), limits = c(0.2, 3), breaks = c(0.2, 0.5, 1, 2, 3)) + scale_y_continuous(trans = log10_trans(), limits = c(350, 15000), breaks = c(350, 1000, 5000, 10000, 15000)) + ggtitle('Price (log10) by Cube-Root of Carat')
+```
+
+## Price vs. Carat and Clarity 
+```{r}
+install.packages('RColorBrewer', dependencies = TRUE)
+library(RColorBrewer)
+
+ggplot(aes(x = carat, y = price, colour = clarity), data = diamonds) + geom_point(alpha = 0.5, size = 1, position = 'jitter') + scale_color_brewer(type = 'div', guide = guide_legend(title = 'Clarity', reverse = TRUE, override.aes = list(alpha = 1, size = 2))) + scale_x_continuous(trans = cuberoot_trans(), limits = c(0.2, 3), breaks = c(0.2, 0.5, 1, 2, 3)) + scale_y_continuous(trans = log10_trans(), limits = c(350, 15000), breaks = c(350, 1000, 5000, 10000, 15000)) + ggtitle('Price (log10) vs Cube Root of Carat and Clarity')
+```
+## Price vs Carat and Cut
+```{r}
+ggplot(aes(x = carat, y = price, color = cut), data = diamonds) + geom_point(alpha = 0.5, size = 1, position = 'jitter') + scale_color_brewer(type = 'div', guide = guide_legend(title = 'Cut', reverse = TRUE, override.aes = list(alpha = 1, size = 2))) + scale_x_continuous(trans = cuberoot_trans(), limits = c(0.2, 3), breaks = c(0.2, 0.5, 1, 2, 3)) + scale_y_continuous(trans = log10_trans(), limits = c(350, 15000), breaks = c(350, 1000, 5000, 10000, 15000)) + ggtitle('Price (log10) vs Cube Root of Carat and Cut')
+```
+
+## Price vs Carat and Color
+```{r}
+ggplot(aes(x = carat, y = price, color = color), data = diamonds) + geom_point(alpha = 0.5, size = 1, position = 'jitter') + scale_color_brewer(type = 'div', guide = guide_legend(title = 'Color', reverse = FALSE, override.aes = list(alpha = 1, size = 2))) + scale_x_continuous(trans = cuberoot_trans(), limits = c(0.2, 3), breaks = c(0.2, 0.5, 1, 2, 3)) + scale_y_continuous(trans = log10_trans(), limits = c(350, 15000), breaks = c(350, 1000, 5000, 10000, 15000)) + ggtitle('Price (log10) vs Cube Root of Carat and Color')
+```
+## Building the linear model
+```{r}
+m1 <- lm(I(log(price)) ~ I(carat^(1/3)), data = diamonds)
+m2 <- update(m1, ~ . + carat)
+m3 <- update(m2, ~ . + cut)
+m4 <- update(m3, ~ . + color)
+m5 <- update(m4, ~ . + clarity)
+mtable(m1, m2, m3, m4, m5, sdigits = 3)
+```
+##
+```{r}
+#install.packages('RCurl')
+#install.packages('bitops')
+library('RCurl')
+library('bitops')
+diamondsurl = getBinaryURL("https://raw.github.com/solomonm/diamonds-data/master/BigDiamonds.Rda")
+load(rawConnection(diamondsurl))
+```
+
+```{r}
+library(readr)
+diamondsbig <- read_csv("diamondsbig.csv")
+```
+
+```{r}
+diamondsbig$logprice = log(diamondsbig$price)
+m1 <- lm(logprice ~ I(carat^(1/3)), data=diamondsbig[diamondsbig$price < 10000 & diamondsbig$cert == "GIA",])
+m2 <- update(m1, ~ . + carat)
+m3 <- update(m2, ~ . + cut)
+m4 <- update(m3, ~ . + color)
+m5 <- update(m4, ~ . + clarity)
+#library(memisc)
+mtable(m1, m2, m3, m4, m5)
+```
+
+## Predictions
+
+```{r}
+thisDiamond = data.frame(carat = 1.00, cut = "V.Good", color = "I", clarity="VS1")
+modelEstimate = predict(m5, newdata = thisDiamond, interval="prediction", level = .95)
+
+exp(modelEstimate)
+
+dat = data.frame(m4$model, m4$residuals)
+
+with(dat, sd(m4.residuals))
+
+with(subset(dat, carat > .9 & carat < 1.1), sd(m4.residuals))
+
+dat$resid <- as.numeric(dat$m4.residuals)
+ggplot(aes(y = resid, x = round(carat, 2)), data = dat) +
+  geom_line(stat = "summary", fun.y = sd)
+```
